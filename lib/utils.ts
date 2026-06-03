@@ -52,6 +52,10 @@ export function isExpired(expiresAt: string) {
 }
 
 export function publicShareUrl(slug: string) {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return `${process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "")}/s/${slug}`;
+  }
+
   if (typeof window === "undefined") {
     return `/s/${slug}`;
   }

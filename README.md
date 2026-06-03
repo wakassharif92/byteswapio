@@ -28,6 +28,7 @@ npm install
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_APP_URL=https://www.byteswapio.com
 ```
 
 3. Create a Supabase project and run all SQL files in order:
