@@ -120,9 +120,9 @@ export function HomeShareModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const menuItemClass =
-    "group grid grid-cols-[54px_1fr] items-center gap-4 rounded-xl border border-blue-200/80 bg-blue-50/65 px-4 py-3 text-left transition hover:border-blue-300 hover:bg-blue-100/75 hover:shadow-sm";
+    "group grid grid-cols-[46px_1fr] items-center gap-3 rounded-xl border border-blue-200/80 bg-blue-50/65 px-3 py-2.5 text-left transition hover:border-blue-300 hover:bg-blue-100/75 hover:shadow-sm sm:grid-cols-[54px_1fr] sm:gap-4 sm:px-4 sm:py-3";
   const iconClass =
-    "grid h-12 w-12 place-items-center rounded-2xl bg-blue-200/70 text-blue-600 transition group-hover:bg-blue-200 group-hover:text-blue-700";
+    "grid h-11 w-11 place-items-center rounded-2xl bg-blue-200/70 text-blue-600 transition group-hover:bg-blue-200 group-hover:text-blue-700 sm:h-12 sm:w-12";
 
   async function createBookmark(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -233,7 +233,7 @@ export function HomeShareModal({
   }
 
   return (
-    <div className="relative inline-flex">
+    <div className="relative inline-flex w-full sm:w-auto">
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
@@ -252,13 +252,14 @@ export function HomeShareModal({
             onClick={close}
           />
           <div
-            className={`absolute z-50 w-[min(92vw,430px)] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl ${
-              align === "center" ? "left-1/2 -translate-x-1/2" : "left-0"
+            className={`fixed inset-x-0 bottom-0 z-50 max-h-[86dvh] overflow-y-auto rounded-t-[28px] border border-white/70 bg-white/95 shadow-2xl backdrop-blur-xl sm:absolute sm:inset-auto sm:max-h-[min(78vh,720px)] sm:w-[min(92vw,430px)] sm:overflow-hidden sm:rounded-lg sm:border-slate-200 sm:bg-white ${
+              align === "center" ? "sm:left-1/2 sm:-translate-x-1/2" : "sm:left-0"
             } ${
-              placement === "top" ? "bottom-full mb-4" : "top-full mt-3"
+              placement === "top" ? "sm:bottom-full sm:mb-4" : "sm:top-full sm:mt-3"
             }`}
           >
-            <div className="bg-white p-3">
+            <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-slate-200 sm:hidden" />
+            <div className="bg-white/95 p-4 sm:bg-white sm:p-3">
               {!bookmarkOpen && !passwordOpen && !loginRequiredOpen ? (
                 <div className="grid gap-2">
                   <button

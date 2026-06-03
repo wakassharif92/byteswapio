@@ -39,8 +39,8 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_31%_76%,rgba(244,114,255,0.44),transparent_24%),radial-gradient(circle_at_52%_42%,rgba(234,240,74,0.38),transparent_25%),radial-gradient(circle_at_86%_42%,rgba(248,113,113,0.3),transparent_28%),radial-gradient(circle_at_96%_4%,rgba(125,211,252,0.34),transparent_24%),radial-gradient(circle_at_4%_0%,rgba(196,181,253,0.34),transparent_26%),linear-gradient(180deg,#fafbff_0%,#fff8fb_48%,#f7faff_100%)]">
       <Navbar />
-      <main className="mx-auto w-full max-w-7xl px-4 pb-20 pt-10 sm:px-6">
-        <div className="max-w-3xl">
+      <main className="mx-auto w-full max-w-7xl px-3 pb-20 pt-4 sm:px-6 sm:pt-10">
+        <div className="hidden max-w-3xl sm:block">
           <p className="text-base font-bold text-blue-700">Dashboard</p>
           <h1 className="mt-3 text-5xl font-black leading-tight text-black sm:text-6xl">
             Your private <BrandWordmark className="text-inherit" /> library.

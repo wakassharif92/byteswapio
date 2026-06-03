@@ -4,7 +4,10 @@ import {
   type FeatureAction,
 } from "@/components/FeatureShareButton";
 import { HomeShareModal } from "@/components/HomeShareModal";
+import { MobileSharePanel } from "@/components/MobileSharePanel";
 import { Navbar } from "@/components/Navbar";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 const featureDetails: {
   label: string;
@@ -63,23 +66,32 @@ const featureDetails: {
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+
+  if (data.user) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_31%_76%,rgba(244,114,255,0.44),transparent_24%),radial-gradient(circle_at_52%_42%,rgba(234,240,74,0.38),transparent_25%),radial-gradient(circle_at_86%_42%,rgba(248,113,113,0.3),transparent_28%),radial-gradient(circle_at_96%_4%,rgba(125,211,252,0.34),transparent_24%),radial-gradient(circle_at_4%_0%,rgba(196,181,253,0.34),transparent_26%),linear-gradient(180deg,#fafbff_0%,#fff8fb_48%,#f7faff_100%)]">
       <div className="relative z-10">
         <Navbar />
       </div>
-      <main className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-24 pt-10 text-center sm:px-6 lg:pt-12">
+      <main className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-28 pt-6 text-center sm:px-6 sm:pt-10 lg:pt-12">
         <section className="mx-auto max-w-6xl">
-          <div className="mx-auto mb-12 w-fit rounded-full border border-black/10 bg-white/60 px-5 py-3 text-base font-medium text-slate-700 shadow-sm backdrop-blur">
+          <div className="mx-auto mb-8 w-fit rounded-full border border-black/10 bg-white/60 px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm backdrop-blur sm:mb-12 sm:px-5 sm:py-3 sm:text-base">
             Live links for code, docs, notes, bookmarks, pasteboards & vaults
           </div>
 
-          <h1 className="text-[64px] font-black leading-[0.9] text-black sm:text-[92px] lg:text-[118px]">
+          <h1 className="text-[48px] font-black leading-[0.9] text-black sm:text-[92px] lg:text-[118px]">
             Share your things.
-            <span className="mt-5 block text-black/60">Keep it live.</span>
+            <span className="mt-3 block text-black/60 sm:mt-5">
+              Keep it live.
+            </span>
           </h1>
-          <div className="mx-auto mt-12 max-w-4xl space-y-5 text-2xl leading-10 sm:text-[28px] sm:leading-[46px]">
+          <div className="mx-auto mt-8 max-w-4xl space-y-4 text-xl leading-9 sm:mt-12 sm:space-y-5 sm:text-[28px] sm:leading-[46px]">
             <p className="text-slate-600">
               <BrandWordmark className="text-inherit" /> creates live links for
               code, docs, notes, bookmarks, links, CC pasteboards, and
@@ -93,7 +105,7 @@ export default function Home() {
             </p> */}
           </div>
 
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
+          <div className="mt-8 flex flex-wrap justify-center gap-3 sm:mt-10 sm:gap-4">
             <span className="rounded-full border border-blue-300 bg-white/55 px-5 py-3 text-base font-medium text-blue-700 shadow-sm backdrop-blur">
               Live Realtime editing
             </span>
@@ -105,11 +117,13 @@ export default function Home() {
             </span>
           </div>
 
-          <div className="mt-12 flex items-center justify-center">
+          <MobileSharePanel />
+
+          <div className="mt-12 hidden items-center justify-center lg:flex">
             <HomeShareModal
               align="center"
               placement="top"
-              buttonClassName="w-[min(92vw,430px)] rounded-md bg-blue-600 px-12 py-5 text-center text-xl font-bold text-white shadow-[0_18px_45px_rgba(37,99,235,0.28)] transition hover:bg-blue-700"
+              buttonClassName="w-[min(92vw,430px)] rounded-md bg-blue-600 px-8 py-4 text-center text-lg font-bold text-white shadow-[0_18px_45px_rgba(37,99,235,0.28)] transition hover:bg-blue-700 sm:px-12 sm:py-5 sm:text-xl"
             />
           </div>
 
@@ -119,7 +133,7 @@ export default function Home() {
           </div> */}
         </section>
 
-        <section className="mx-auto mt-20 grid max-w-6xl gap-5 text-left md:grid-cols-3">
+        <section className="mx-auto mt-14 grid max-w-6xl gap-4 text-left sm:mt-20 sm:gap-5 md:grid-cols-3">
           {[
             [
               "Code & docs",
@@ -136,7 +150,7 @@ export default function Home() {
           ].map(([title, text]) => (
             <div
               key={title}
-              className="rounded-lg border border-white/70 bg-white/65 p-7 shadow-sm backdrop-blur"
+              className="rounded-lg border border-white/70 bg-white/65 p-5 shadow-sm backdrop-blur sm:p-7"
             >
               <h2 className="text-lg font-bold text-slate-950">{title}</h2>
               <p className="mt-3 text-base leading-7 text-slate-600">{text}</p>
@@ -144,15 +158,15 @@ export default function Home() {
           ))}
         </section>
 
-        <section className="mx-auto mt-24 max-w-6xl text-left">
+        <section className="mx-auto mt-16 max-w-6xl text-left sm:mt-24">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-base font-semibold text-blue-700">
               What you can share
             </p>
-            <h2 className="mt-4 text-4xl font-black leading-tight text-black sm:text-6xl">
+            <h2 className="mt-4 text-3xl font-black leading-tight text-black sm:text-6xl">
               Built for the little things teams pass around all day.
             </h2>
-            <p className="mt-6 text-xl leading-9 text-slate-600">
+            <p className="mt-5 text-lg leading-8 text-slate-600 sm:mt-6 sm:text-xl sm:leading-9">
               <BrandWordmark className="text-inherit" /> keeps every share
               lightweight, live, and easy to open. Use the simple tools for
               public temporary sharing, and the vault for sensitive passwords
@@ -160,15 +174,15 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-5 md:grid-cols-2">
+          <div className="mt-10 grid gap-4 sm:mt-12 sm:gap-5 md:grid-cols-2">
             {featureDetails.map((feature, index) => (
               <article
                 key={feature.label}
-                className={`rounded-xl border border-white/70 bg-white/65 p-7 shadow-sm backdrop-blur ${
+                className={`rounded-xl border border-white/70 bg-white/65 p-5 shadow-sm backdrop-blur sm:p-7 ${
                   index === featureDetails.length - 1 ? "md:col-span-2" : ""
                 }`}
               >
-                <div className="flex items-start gap-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
                   <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-blue-200/70 text-lg font-black text-blue-600">
                     {String(index + 1).padStart(2, "0")}
                   </div>

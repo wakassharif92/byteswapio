@@ -18,6 +18,16 @@ body {
   font-family: var(--font-sans);
 }
 
+.mobile-bottom-nav {
+  display: flex;
+}
+
+@media (min-width: 1024px) {
+  .mobile-bottom-nav {
+    display: none;
+  }
+}
+
 .field {
   border: 1px solid #dbeafe;
   border-radius: 0.75rem;

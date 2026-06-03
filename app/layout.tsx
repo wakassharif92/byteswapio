@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,8 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="flex min-h-full flex-col bg-slate-50 text-slate-950">
+      <body className="flex min-h-full flex-col bg-slate-50 pb-24 text-slate-950 lg:pb-0">
         {children}
+        <MobileBottomNav />
       </body>
     </html>
   );

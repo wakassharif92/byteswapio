@@ -52,7 +52,7 @@ export function FeatureShareButton({ action }: { action: FeatureAction }) {
       <button
         type="button"
         onClick={openShare}
-        className="mt-6 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
+        className="mt-6 w-full rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 sm:w-auto"
       >
         Share Things Now
       </button>
