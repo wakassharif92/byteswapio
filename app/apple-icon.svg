@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="byteGradient" x1="22" y1="18" x2="158" y2="162" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2563eb" />
+      <stop offset="0.48" stop-color="#c026d3" />
+      <stop offset="1" stop-color="#020617" />
+    </linearGradient>
+    <radialGradient id="glow" cx="90" cy="88" r="84" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.96" />
+      <stop offset="0.7" stop-color="#dbeafe" stop-opacity="0.9" />
+      <stop offset="1" stop-color="#bfdbfe" stop-opacity="0.92" />
+    </radialGradient>
+  </defs>
+  <rect width="180" height="180" rx="44" fill="url(#byteGradient)" />
+  <rect x="14" y="14" width="152" height="152" rx="38" fill="url(#glow)" />
+  <path
+    d="M55 45h45.6c16.8 0 28.3 9.4 28.3 24.2 0 8.9-4.5 15.9-12.8 19.8 10.8 3.8 17.2 12.1 17.2 23.1 0 16.9-12.9 25.9-32.5 25.9H55V45Zm41.9 37.1c8.2 0 13.1-3.8 13.1-10.4 0-6.4-4.8-10.1-13.1-10.1H74.6v20.5h22.3Zm3.1 39.9c9.3 0 14.5-4.1 14.5-11.5 0-7.1-5.4-11.2-14.8-11.2H74.6V122H100Z"
+    fill="url(#byteGradient)"
+  />
+</svg>

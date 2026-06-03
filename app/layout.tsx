@@ -5,6 +5,11 @@ export const metadata: Metadata = {
   title: "ByteSwapio",
   description:
     "Live expiring links for code, documents, notes, links, and encrypted passwords.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/apple-icon.svg",
+  },
 };
 
 export default function RootLayout({
