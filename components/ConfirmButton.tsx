@@ -45,9 +45,11 @@ export function ConfirmButton({
               <button
                 type={formSubmit ? "submit" : "button"}
                 onClick={() => {
-                  if (!formSubmit) {
-                    onConfirm?.();
+                  if (formSubmit) {
+                    return;
                   }
+
+                  onConfirm?.();
                   setOpen(false);
                 }}
                 className="rounded-md bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
