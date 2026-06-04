@@ -43,6 +43,7 @@ export function ShareEditor({ type }: { type: ShareType }) {
   const saveTimer = useRef<number | null>(null);
   const applyingRemoteChange = useRef(false);
   const hasPendingLocalChange = useRef(false);
+  const localEditVersion = useRef(0);
   const [shareId, setShareId] = useState("");
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState(defaultTitle(type));
@@ -224,6 +225,8 @@ export function ShareEditor({ type }: { type: ShareType }) {
       window.clearTimeout(saveTimer.current);
     }
 
+    const saveVersion = localEditVersion.current;
+
     saveTimer.current = window.setTimeout(async () => {
       setStatus("saving");
       const [{ error: shareError }, { error: contentError }] =
@@ -251,8 +254,10 @@ export function ShareEditor({ type }: { type: ShareType }) {
         return;
       }
 
-      hasPendingLocalChange.current = false;
-      setStatus("saved");
+      if (saveVersion === localEditVersion.current) {
+        hasPendingLocalChange.current = false;
+        setStatus("saved");
+      }
     }, 600);
 
     return () => {
@@ -346,6 +351,7 @@ export function ShareEditor({ type }: { type: ShareType }) {
   }
 
   function markLocalChange() {
+    localEditVersion.current += 1;
     hasPendingLocalChange.current = true;
   }
 

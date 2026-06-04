@@ -35,6 +35,7 @@ export function PublicShareViewer({
   const supabase = useMemo(() => createClient(), []);
   const saveTimer = useRef<number | null>(null);
   const hasPendingLocalChange = useRef(false);
+  const localEditVersion = useRef(0);
   const [share, setShare] = useState(initialShare);
   const [content, setContent] = useState<ShareContent | null>(
     initialShare.share_contents,
@@ -114,7 +115,10 @@ export function PublicShareViewer({
     };
   }, [share.id, supabase]);
 
-  function scheduleContentSave(next: Partial<ShareContent>) {
+  function scheduleContentSave(
+    next: Partial<ShareContent>,
+    saveVersion: number,
+  ) {
     if (!content?.share_id || share.type === "password") {
       return;
     }
@@ -134,12 +138,16 @@ export function PublicShareViewer({
         return;
       }
 
-      hasPendingLocalChange.current = false;
+      if (saveVersion === localEditVersion.current) {
+        hasPendingLocalChange.current = false;
+      }
     }, 450);
   }
 
   function markLocalChange() {
+    localEditVersion.current += 1;
     hasPendingLocalChange.current = true;
+    return localEditVersion.current;
   }
 
   async function unlockPassword(event: React.FormEvent<HTMLFormElement>) {
@@ -378,9 +386,9 @@ export function PublicShareViewer({
               className="min-h-96 w-full resize-y rounded-md bg-slate-950 p-4 font-mono text-sm leading-6 text-slate-50 outline-none focus:ring-2 focus:ring-sky-500"
               value={body}
               onChange={(event) => {
-                markLocalChange();
+                const saveVersion = markLocalChange();
                 setBody(event.target.value);
-                scheduleContentSave({ body: event.target.value });
+                scheduleContentSave({ body: event.target.value }, saveVersion);
               }}
               placeholder="Waiting for live content..."
               spellCheck={false}
@@ -401,9 +409,9 @@ export function PublicShareViewer({
               suppressContentEditableWarning
               onInput={(event) => {
                 const nextHtml = event.currentTarget.innerHTML;
-                markLocalChange();
+                const saveVersion = markLocalChange();
                 setHtml(nextHtml);
-                scheduleContentSave({ html: nextHtml });
+                scheduleContentSave({ html: nextHtml }, saveVersion);
               }}
             />
             <div className="mt-3">
@@ -429,9 +437,12 @@ export function PublicShareViewer({
                 className="min-h-56 rounded-md border border-slate-300 px-3 py-2 font-normal leading-7 outline-none focus:border-slate-950"
                 value={notes}
                 onChange={(event) => {
-                  markLocalChange();
+                  const saveVersion = markLocalChange();
                   setNotes(event.target.value);
-                  scheduleContentSave({ notes: event.target.value });
+                  scheduleContentSave(
+                    { notes: event.target.value },
+                    saveVersion,
+                  );
                 }}
                 placeholder="Add shared notes..."
               />
@@ -447,9 +458,9 @@ export function PublicShareViewer({
                 className="min-h-96 rounded-md border border-slate-300 px-3 py-2 font-normal leading-7 outline-none focus:border-slate-950"
                 value={body}
                 onChange={(event) => {
-                  markLocalChange();
+                  const saveVersion = markLocalChange();
                   setBody(event.target.value);
-                  scheduleContentSave({ body: event.target.value });
+                  scheduleContentSave({ body: event.target.value }, saveVersion);
                 }}
                 placeholder="Waiting for live content..."
               />

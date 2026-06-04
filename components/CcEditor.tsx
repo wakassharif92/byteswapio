@@ -14,6 +14,7 @@ export function CcEditor({ initialShare }: { initialShare?: PublicShare }) {
   const saveTimer = useRef<number | null>(null);
   const applyingRemoteChange = useRef(false);
   const hasPendingLocalChange = useRef(false);
+  const localEditVersion = useRef(0);
   const [shareId, setShareId] = useState(initialShare?.id ?? "");
   const [slug, setSlug] = useState(initialShare?.slug ?? "");
   const [body, setBody] = useState(initialShare?.share_contents?.body ?? "");
@@ -122,6 +123,8 @@ export function CcEditor({ initialShare }: { initialShare?: PublicShare }) {
       window.clearTimeout(saveTimer.current);
     }
 
+    const saveVersion = localEditVersion.current;
+
     setStatus("Saving...");
     saveTimer.current = window.setTimeout(async () => {
       const { error: saveError } = await supabase
@@ -135,8 +138,10 @@ export function CcEditor({ initialShare }: { initialShare?: PublicShare }) {
         return;
       }
 
-      hasPendingLocalChange.current = false;
-      setStatus("Saved");
+      if (saveVersion === localEditVersion.current) {
+        hasPendingLocalChange.current = false;
+        setStatus("Saved");
+      }
     }, 350);
 
     return () => {
@@ -190,6 +195,7 @@ export function CcEditor({ initialShare }: { initialShare?: PublicShare }) {
               className="h-[calc(100vh-16.5rem)] w-full resize-none rounded-[20px] border border-transparent bg-white/80 p-6 text-lg font-medium leading-9 text-slate-800 outline-none placeholder:text-slate-400 focus:bg-white sm:p-8"
               value={body}
               onChange={(event) => {
+                localEditVersion.current += 1;
                 hasPendingLocalChange.current = true;
                 setBody(event.target.value);
               }}
