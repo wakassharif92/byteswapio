@@ -1,14 +1,13 @@
 "use client";
 
-import { CopyButton } from "@/components/CopyButton";
-import { DeleteShareButton } from "@/components/DeleteShareButton";
+import { ConfirmButton } from "@/components/ConfirmButton";
 import { HomeShareModal } from "@/components/HomeShareModal";
 import { createClient } from "@/lib/supabase/client";
 import { SHARE_TYPE_LABELS, SHARE_TYPES, type Share, type ShareType } from "@/lib/types";
 import { isExpired, publicShareUrl } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 
 type Category = "all" | ShareType;
 
@@ -22,11 +21,110 @@ const categoryDescriptions: Record<Category, string> = {
   password: "Vaults",
 };
 
+function ActionIcon({
+  children,
+  label,
+  className = "",
+  onClick,
+}: {
+  children: ReactNode;
+  label: string;
+  className?: string;
+  onClick?: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      className={`grid h-10 w-10 place-items-center rounded-full border border-blue-200 bg-white/85 text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 ${className}`}
+    >
+      <svg
+        aria-hidden="true"
+        className="h-4.5 w-4.5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      >
+        {children}
+      </svg>
+    </button>
+  );
+}
+
+function ActionLink({
+  children,
+  href,
+  label,
+  external = false,
+}: {
+  children: ReactNode;
+  href: string;
+  label: string;
+  external?: boolean;
+}) {
+  const className =
+    "grid h-10 w-10 place-items-center rounded-full border border-blue-200 bg-white/85 text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50";
+
+  if (external) {
+    return (
+      <a
+        aria-label={label}
+        title={label}
+        className={className}
+        href={href}
+        rel="noreferrer"
+        target="_blank"
+      >
+        <svg
+          aria-hidden="true"
+          className="h-4.5 w-4.5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        >
+          {children}
+        </svg>
+      </a>
+    );
+  }
+
+  return (
+    <Link aria-label={label} title={label} className={className} href={href}>
+      <svg
+        aria-hidden="true"
+        className="h-4.5 w-4.5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      >
+        {children}
+      </svg>
+    </Link>
+  );
+}
+
 export function DashboardShares({ shares }: { shares: Share[] }) {
   const router = useRouter();
   const [localShares, setLocalShares] = useState(shares);
   const [category, setCategory] = useState<Category>("all");
   const [deleteError, setDeleteError] = useState("");
+  const [copiedShareId, setCopiedShareId] = useState("");
+  const [editingShare, setEditingShare] = useState<Share | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editError, setEditError] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
   const categories = useMemo(
     () =>
       (["all", ...SHARE_TYPES] as Category[]).map((type) => ({
@@ -54,6 +152,60 @@ export function DashboardShares({ shares }: { shares: Share[] }) {
     }
 
     setLocalShares((current) => current.filter((share) => share.id !== id));
+    router.refresh();
+  }
+
+  async function copyShareLink(id: string, url: string) {
+    await navigator.clipboard.writeText(url);
+    setCopiedShareId(id);
+    window.setTimeout(() => setCopiedShareId(""), 1600);
+  }
+
+  function openEditDialog(share: Share) {
+    setEditingShare(share);
+    setEditTitle(share.title);
+    setEditDescription(share.description ?? "");
+    setEditError("");
+  }
+
+  async function saveEdit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!editingShare) {
+      return;
+    }
+
+    setEditSaving(true);
+    setEditError("");
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("shares")
+      .update({
+        title: editTitle,
+        description: editDescription || null,
+      })
+      .eq("id", editingShare.id);
+
+    setEditSaving(false);
+
+    if (error) {
+      setEditError(error.message);
+      return;
+    }
+
+    setLocalShares((current) =>
+      current.map((share) =>
+        share.id === editingShare.id
+          ? {
+              ...share,
+              title: editTitle,
+              description: editDescription || null,
+            }
+          : share,
+      ),
+    );
+    setEditingShare(null);
     router.refresh();
   }
 
@@ -154,9 +306,9 @@ export function DashboardShares({ shares }: { shares: Share[] }) {
         ) : null}
 
         <div className="mt-4 overflow-hidden rounded-xl border border-blue-100/80 bg-white/70 sm:mt-5">
-          <div className="hidden grid-cols-[120px_1fr_120px_120px_1fr_260px] gap-4 border-b border-blue-100/80 bg-blue-50/70 px-4 py-4 text-sm font-black text-slate-600 lg:grid">
+          <div className="hidden grid-cols-[120px_1fr_120px_120px_1fr_250px] gap-4 border-b border-blue-100/80 bg-blue-50/70 px-4 py-4 text-sm font-black text-slate-600 lg:grid">
             <span>Type</span>
-            <span>Title</span>
+            <span>Details</span>
             <span>Created</span>
             <span>Expires</span>
             <span>Public link</span>
@@ -173,12 +325,25 @@ export function DashboardShares({ shares }: { shares: Share[] }) {
               return (
                 <div
                   key={share.id}
-                  className="grid min-w-0 gap-3 border-b border-blue-50 px-3 py-4 text-sm last:border-b-0 sm:px-4 sm:py-5 lg:grid-cols-[120px_1fr_120px_120px_1fr_260px] lg:items-center"
+                  className="grid min-w-0 gap-3 border-b border-blue-50 px-3 py-4 text-sm last:border-b-0 sm:px-4 sm:py-5 lg:grid-cols-[120px_1fr_120px_120px_1fr_250px] lg:items-center"
                 >
                   <span className="w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black text-blue-700">
                     {SHARE_TYPE_LABELS[share.type]}
                   </span>
-                  <span className="font-black text-slate-950">{share.title}</span>
+                  <span className="min-w-0">
+                    <span className="block font-black text-slate-950">
+                      {share.title}
+                    </span>
+                    {share.description ? (
+                      <span className="mt-1 line-clamp-2 block text-sm leading-6 text-slate-600">
+                        {share.description}
+                      </span>
+                    ) : (
+                      <span className="mt-1 block text-sm text-slate-400">
+                        No description
+                      </span>
+                    )}
+                  </span>
                   <span className="text-slate-600">
                     {new Date(share.created_at).toLocaleDateString()}
                   </span>
@@ -200,24 +365,67 @@ export function DashboardShares({ shares }: { shares: Share[] }) {
                     {publicUrl}
                   </Link>
                   <div className="flex min-w-0 flex-row flex-wrap items-center gap-2">
-                    <Link
-                      className="rounded-full border border-blue-200 bg-white/80 px-4 py-2 text-sm font-bold text-blue-700 shadow-sm transition hover:bg-blue-50"
-                      href={fullPublicUrl}
-                    >
-                      Open
-                    </Link>
+                    <ActionLink href={fullPublicUrl} label="Open share">
+                      <path d="M7 17 17 7" />
+                      <path d="M8 7h9v9" />
+                    </ActionLink>
                     {share.url && (share.type === "link" || share.type === "bookmark") ? (
-                      <a
-                        className="rounded-full border border-blue-200 bg-white/80 px-4 py-2 text-sm font-bold text-blue-700 shadow-sm transition hover:bg-blue-50"
+                      <ActionLink
+                        external
                         href={share.url}
-                        rel="noreferrer"
-                        target="_blank"
+                        label="Open saved URL"
                       >
-                        Visit URL
-                      </a>
+                        <path d="M10 13a5 5 0 0 0 7.07 0l2-2a5 5 0 0 0-7.07-7.07l-1 1" />
+                        <path d="M14 11a5 5 0 0 0-7.07 0l-2 2a5 5 0 0 0 7.07 7.07l1-1" />
+                      </ActionLink>
                     ) : null}
-                    <CopyButton value={fullPublicUrl} />
-                    <DeleteShareButton onDelete={() => deleteShareById(share.id)} />
+                    <ActionIcon
+                      label={
+                        copiedShareId === share.id ? "Copied" : "Copy link"
+                      }
+                      onClick={() => copyShareLink(share.id, fullPublicUrl)}
+                    >
+                      {copiedShareId === share.id ? (
+                        <path d="m5 13 4 4L19 7" />
+                      ) : (
+                        <>
+                          <path d="M10 13a5 5 0 0 0 7.07 0l2-2a5 5 0 0 0-7.07-7.07l-1 1" />
+                          <path d="M14 11a5 5 0 0 0-7.07 0l-2 2a5 5 0 0 0 7.07 7.07l1-1" />
+                        </>
+                      )}
+                    </ActionIcon>
+                    <ActionIcon
+                      label="Edit title and description"
+                      onClick={() => openEditDialog(share)}
+                    >
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </ActionIcon>
+                    <ConfirmButton
+                      title="Delete share?"
+                      description="This cannot be recovered and the shared link will stop working immediately."
+                      confirmLabel="Delete"
+                      onConfirm={() => deleteShareById(share.id)}
+                      className="grid h-10 w-10 place-items-center rounded-full border border-red-200 bg-white/85 text-red-600 shadow-sm transition hover:border-red-300 hover:bg-red-50"
+                    >
+                      <span className="sr-only">Delete share</span>
+                      <svg
+                        aria-hidden="true"
+                        className="h-4.5 w-4.5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                      >
+                        <path d="M3 6h18" />
+                        <path d="M8 6V4h8v2" />
+                        <path d="M6 6l1 18h10l1-18" />
+                        <path d="M10 11v6" />
+                        <path d="M14 11v6" />
+                      </svg>
+                    </ConfirmButton>
                   </div>
                 </div>
               );
@@ -229,6 +437,67 @@ export function DashboardShares({ shares }: { shares: Share[] }) {
           )}
         </div>
       </section>
+      {editingShare ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4 backdrop-blur-sm">
+          <form
+            onSubmit={saveEdit}
+            className="grid w-full max-w-lg gap-5 rounded-[28px] bg-[linear-gradient(135deg,rgba(37,99,235,0.68),rgba(244,114,255,0.52),rgba(234,240,74,0.36),rgba(125,211,252,0.6))] p-[2px] shadow-2xl"
+          >
+            <div className="rounded-[26px] bg-white/92 p-5 backdrop-blur">
+              <div>
+                <p className="text-sm font-black uppercase text-blue-700">
+                  Edit share
+                </p>
+                <h2 className="mt-1 text-2xl font-black text-slate-950">
+                  Title and description
+                </h2>
+              </div>
+              <div className="mt-5 grid gap-4">
+                <label className="grid gap-2 text-sm font-bold text-slate-700">
+                  Title
+                  <input
+                    className="field bg-white/80 shadow-sm"
+                    value={editTitle}
+                    onChange={(event) => setEditTitle(event.target.value)}
+                    required
+                  />
+                </label>
+                <label className="grid gap-2 text-sm font-bold text-slate-700">
+                  Description
+                  <textarea
+                    className="min-h-28 rounded-xl border border-blue-100 bg-white/80 px-3 py-2 shadow-sm outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+                    value={editDescription}
+                    onChange={(event) =>
+                      setEditDescription(event.target.value)
+                    }
+                    placeholder="Add context for this share"
+                  />
+                </label>
+                {editError ? (
+                  <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                    {editError}
+                  </p>
+                ) : null}
+              </div>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <button
+                  disabled={editSaving}
+                  className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {editSaving ? "Saving..." : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingShare(null)}
+                  className="rounded-full border border-blue-200 bg-white/80 px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-blue-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }
