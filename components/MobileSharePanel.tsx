@@ -48,7 +48,7 @@ const actions: {
   {
     action: "cc",
     title: "CC",
-    description: "One-hour pasteboard",
+    description: "24-hour pasteboard",
     icon: <path d="M8 5h8M8 9h8M8 13h5m3-1 3 3-3 3" />,
   },
   {

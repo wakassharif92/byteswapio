@@ -1,18 +1,18 @@
 # ByteSwapio
 
-ByteSwapio is a production-ready MVP for live expiring shares built with Next.js App Router, TypeScript, Tailwind CSS, and Supabase only.
+ByteSwapio is a production-ready MVP for live shares built with Next.js App Router, TypeScript, Tailwind CSS, and Supabase only.
 
 ## Features
 
 - Share code, documents, links, bookmarks, notes, and encrypted passwords.
 - Public `/s/[slug]` links update live with Supabase Realtime.
-- Fast copy-paste links at `/cc` create one-hour live notes with simple names such as `/cc/ali92`.
-- Regular non-password shares use short names such as `/s/anderson92` and expire after 3 days.
+- Fast copy-paste links at `/cc` create 24-hour live notes with simple names such as `/cc/ali92`.
+- Regular shares use short names such as `/s/anderson92` and stay available until deleted.
 - Password vault links use long high-entropy URLs and never expire automatically.
-- Code, document, link, bookmark, and note shares default to `expires_at = now() + 3 days`.
+- Code, document, link, bookmark, note, and password shares default to a far-future `expires_at` timestamp.
 - Password vault links do not expire automatically; only the owner can delete them from the dashboard.
 - Authenticated users get a private dashboard at `/dashboard`.
-- Guest links are temporary and are deleted from Postgres after expiry.
+- CC links are temporary and are deleted from Postgres after expiry.
 - Password shares are encrypted vault files with multiple name/password rows. Plain passwords are never stored.
 
 ## Setup
@@ -64,7 +64,7 @@ RLS policies created:
 
 Cleanup created:
 
-- `delete_expired_shares()`: deletes rows from `shares` where `expires_at <= now()`. Related `share_contents` and `password_shares` rows are removed by cascade.
+- `delete_expired_shares()`: deletes rows from `shares` where `expires_at <= now()`. In the current product rules, that mainly removes expired `/cc` pasteboards. Related `share_contents` and `password_shares` rows are removed by cascade.
 - `delete-expired-shares` pg_cron job: runs every 15 minutes.
 
 ## Routes
@@ -98,10 +98,10 @@ Shared password vault links allow viewers with the access password and PIN to ad
 
 ## Logged-in vs guest shares
 
-When a logged-in user creates a document or any other non-password share, ByteSwapio stores it with their `owner_id`, so it appears in `/dashboard`. Anonymous users can still create a public temporary link, but it is a guest link: it does not appear in a dashboard and is deleted from the database after its 3-day expiry.
+When a logged-in user creates a document or any other share, ByteSwapio stores it with their `owner_id`, so it appears in `/dashboard`. Anonymous users can still create a public guest link, but it does not appear in a dashboard. Regular guest shares stay available until deleted; `/cc` pasteboards expire after 24 hours.
 
 ## CC Links
 
-`/cc` is for fast copy-paste sharing. It immediately opens a live note editor and generates a simple one-hour link such as `/cc/john92`. After an hour, cleanup deletes the underlying share so that simple names can be reused.
+`/cc` is for fast copy-paste sharing. It immediately opens a live note editor and generates a simple 24-hour link such as `/cc/john92`. After 24 hours, cleanup deletes the underlying share so that simple names can be reused.
 
-Regular code, document, link, bookmark, and note shares also get simple links such as `/s/ali92`, but those are normal shares and expire after 3 days. Password vault links intentionally use long high-entropy slugs.
+Regular code, document, link, bookmark, and note shares also get simple links such as `/s/ali92`, but those are normal shares and do not auto-expire. Password vault links intentionally use long high-entropy slugs and also never expire automatically.

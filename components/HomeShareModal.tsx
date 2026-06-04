@@ -3,7 +3,7 @@
 import { CopyButton } from "@/components/CopyButton";
 import { createClient } from "@/lib/supabase/client";
 import { SHARE_TYPE_LABELS, SHARE_TYPES, type ShareType } from "@/lib/types";
-import { createSlug, publicShareUrl, threeDaysFromNow } from "@/lib/utils";
+import { createSlug, neverExpires, publicShareUrl } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
@@ -156,7 +156,7 @@ export function HomeShareModal({
           title: name || url,
           description: description || null,
           url,
-          expires_at: threeDaysFromNow(),
+          expires_at: neverExpires(),
         })
         .select("id, slug")
         .single();

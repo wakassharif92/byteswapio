@@ -12,7 +12,7 @@ export default function SharePage() {
         </h1>
         <p className="mt-2 text-slate-600">
           Each <BrandWordmark className="text-inherit" /> link is public, live,
-          and expires after 3 days.
+          and stays available until you delete it.
         </p>
         <div className="mt-8">
           <ShareTypePicker />

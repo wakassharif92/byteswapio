@@ -67,7 +67,7 @@ function ExpiredCc() {
             This CC link has expired
           </h1>
           <p className="mt-2 text-slate-600">
-            Fast copy-paste links last for 1 hour, then the name becomes
+            Fast copy-paste links last for 24 hours, then the name becomes
             reusable.
           </p>
           <Link

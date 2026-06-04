@@ -41,10 +41,8 @@ export function createSecureSlug() {
   return Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("");
 }
 
-export function threeDaysFromNow() {
-  const date = new Date();
-  date.setDate(date.getDate() + 3);
-  return date.toISOString();
+export function neverExpires() {
+  return "9999-12-31T23:59:59.000Z";
 }
 
 export function isExpired(expiresAt: string) {

@@ -15,8 +15,8 @@ import {
   createSlug,
   createSecureSlug,
   defaultTitle,
+  neverExpires,
   publicShareUrl,
-  threeDaysFromNow,
 } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -103,10 +103,7 @@ export function ShareEditor({ type }: { type: ShareType }) {
             description: null,
             url: null,
             language: type === "code" ? "Text" : null,
-            expires_at:
-              type === "password"
-                ? "9999-12-31T23:59:59.000Z"
-                : threeDaysFromNow(),
+            expires_at: neverExpires(),
           })
           .select("id, slug")
           .single();
@@ -783,7 +780,7 @@ export function ShareEditor({ type }: { type: ShareType }) {
                     ? type === "password"
                       ? "Saved until you delete it"
                       : "Saved to your dashboard"
-                    : "Guest link: expires and is deleted after 3 days"}
+                    : "Guest link: available until deleted"}
                 </span>
               ) : null}
             </div>

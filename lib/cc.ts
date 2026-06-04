@@ -13,9 +13,9 @@ const names = [
   "lina",
 ];
 
-export function oneHourFromNow() {
+export function oneDayFromNow() {
   const date = new Date();
-  date.setHours(date.getHours() + 1);
+  date.setHours(date.getHours() + 24);
   return date.toISOString();
 }
 

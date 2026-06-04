@@ -167,6 +167,7 @@ export function DashboardShares({ shares }: { shares: Share[] }) {
             visibleShares.map((share) => {
               const publicUrl = `/s/${share.slug}`;
               const expired = isExpired(share.expires_at);
+              const unlimited = new Date(share.expires_at).getFullYear() >= 9999;
 
               return (
                 <div
@@ -187,7 +188,9 @@ export function DashboardShares({ shares }: { shares: Share[] }) {
                   >
                     {expired
                       ? "Expired"
-                      : new Date(share.expires_at).toLocaleDateString()}
+                      : unlimited
+                        ? "Unlimited"
+                        : new Date(share.expires_at).toLocaleDateString()}
                   </span>
                   <Link
                     className="min-w-0 break-all font-semibold text-blue-700 hover:text-blue-900"

@@ -3,7 +3,7 @@
 import { BrandWordmark } from "@/components/BrandWordmark";
 import { ClickableLinks } from "@/components/ClickableLinks";
 import { CopyButton } from "@/components/CopyButton";
-import { createCcSlug, ccUrl, oneHourFromNow } from "@/lib/cc";
+import { createCcSlug, ccUrl, oneDayFromNow } from "@/lib/cc";
 import { createClient } from "@/lib/supabase/client";
 import type { PublicShare, ShareContent } from "@/lib/types";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -37,7 +37,7 @@ export function CcEditor({ initialShare }: { initialShare?: PublicShare }) {
             slug: nextSlug,
             title: `CC ${nextSlug}`,
             description: "copy-paste note",
-            expires_at: oneHourFromNow(),
+            expires_at: oneDayFromNow(),
           })
           .select("id, slug")
           .single();
@@ -159,14 +159,14 @@ export function CcEditor({ initialShare }: { initialShare?: PublicShare }) {
                 {status}
               </span>
               <span className="rounded-full border border-white/70 bg-white/70 px-3 py-1 text-sm font-bold text-slate-500">
-                Deletes after 1 hour
+                Deletes after 24 hours
               </span>
             </div>
             <h1 className="mt-3 bg-gradient-to-r from-black via-blue-700 to-fuchsia-600 bg-clip-text text-3xl font-black leading-tight text-transparent sm:text-4xl">
               copy-paste
             </h1>
             <p className="mt-2 text-base leading-7 text-slate-600">
-              A live one-hour pasteboard with a simple shareable link.
+              A live 24-hour pasteboard with a simple shareable link.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">

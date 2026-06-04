@@ -53,9 +53,9 @@ const featureDetails: {
   {
     label: "CC pasteboard",
     action: "cc",
-    title: "A one-hour scratchpad with a memorable link.",
+    title: "A 24-hour scratchpad with a memorable link.",
     description:
-      "Open /cc, pick an easy name, paste fast, and share a simple URL like /cc/john92. It is made for temporary copy-paste work and clears out after one hour.",
+      "Open /cc, pick an easy name, paste fast, and share a simple URL like /cc/john92. It is made for temporary copy-paste work and clears out after 24 hours.",
   },
   {
     label: "Encrypted passwords",
@@ -101,7 +101,7 @@ export default async function Home() {
               Simple short URLs. Realtime edits. Private dashboard.
             </p>
             {/* <p className="font-semibold text-black">
-              Most links expire in 3 days. CC pasteboards expire in 1 hour.
+              Regular shares stay until deleted. CC pasteboards expire in 24 hours.
             </p> */}
           </div>
 
@@ -141,7 +141,7 @@ export default async function Home() {
             ],
             [
               "CC pasteboard",
-              "Open /cc for a one-hour scratch link with a name that is easy to say and type.",
+              "Open /cc for a 24-hour scratch link with a name that is easy to say and type.",
             ],
             [
               "Password vaults",
