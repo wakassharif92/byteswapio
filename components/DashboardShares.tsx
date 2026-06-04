@@ -5,7 +5,7 @@ import { DeleteShareButton } from "@/components/DeleteShareButton";
 import { HomeShareModal } from "@/components/HomeShareModal";
 import { createClient } from "@/lib/supabase/client";
 import { SHARE_TYPE_LABELS, SHARE_TYPES, type Share, type ShareType } from "@/lib/types";
-import { isExpired } from "@/lib/utils";
+import { isExpired, publicShareUrl } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -154,7 +154,7 @@ export function DashboardShares({ shares }: { shares: Share[] }) {
         ) : null}
 
         <div className="mt-4 overflow-hidden rounded-xl border border-blue-100/80 bg-white/70 sm:mt-5">
-          <div className="hidden grid-cols-[120px_1fr_120px_120px_1fr_190px] gap-4 border-b border-blue-100/80 bg-blue-50/70 px-4 py-4 text-sm font-black text-slate-600 lg:grid">
+          <div className="hidden grid-cols-[120px_1fr_120px_120px_1fr_260px] gap-4 border-b border-blue-100/80 bg-blue-50/70 px-4 py-4 text-sm font-black text-slate-600 lg:grid">
             <span>Type</span>
             <span>Title</span>
             <span>Created</span>
@@ -166,13 +166,14 @@ export function DashboardShares({ shares }: { shares: Share[] }) {
           {visibleShares.length ? (
             visibleShares.map((share) => {
               const publicUrl = `/s/${share.slug}`;
+              const fullPublicUrl = publicShareUrl(share.slug);
               const expired = isExpired(share.expires_at);
               const unlimited = new Date(share.expires_at).getFullYear() >= 9999;
 
               return (
                 <div
                   key={share.id}
-                  className="grid min-w-0 gap-3 border-b border-blue-50 px-3 py-4 text-sm last:border-b-0 sm:px-4 sm:py-5 lg:grid-cols-[120px_1fr_120px_120px_1fr_190px] lg:items-center"
+                  className="grid min-w-0 gap-3 border-b border-blue-50 px-3 py-4 text-sm last:border-b-0 sm:px-4 sm:py-5 lg:grid-cols-[120px_1fr_120px_120px_1fr_260px] lg:items-center"
                 >
                   <span className="w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black text-blue-700">
                     {SHARE_TYPE_LABELS[share.type]}
@@ -199,7 +200,23 @@ export function DashboardShares({ shares }: { shares: Share[] }) {
                     {publicUrl}
                   </Link>
                   <div className="flex min-w-0 flex-row flex-wrap items-center gap-2">
-                    <CopyButton value={publicUrl} />
+                    <Link
+                      className="rounded-full border border-blue-200 bg-white/80 px-4 py-2 text-sm font-bold text-blue-700 shadow-sm transition hover:bg-blue-50"
+                      href={fullPublicUrl}
+                    >
+                      Open
+                    </Link>
+                    {share.url && (share.type === "link" || share.type === "bookmark") ? (
+                      <a
+                        className="rounded-full border border-blue-200 bg-white/80 px-4 py-2 text-sm font-bold text-blue-700 shadow-sm transition hover:bg-blue-50"
+                        href={share.url}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        Visit URL
+                      </a>
+                    ) : null}
+                    <CopyButton value={fullPublicUrl} />
                     <DeleteShareButton onDelete={() => deleteShareById(share.id)} />
                   </div>
                 </div>
