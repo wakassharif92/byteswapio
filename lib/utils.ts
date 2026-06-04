@@ -45,6 +45,12 @@ export function neverExpires() {
   return "9999-12-31T23:59:59.000Z";
 }
 
+export function oneDayFromNow() {
+  const date = new Date();
+  date.setHours(date.getHours() + 24);
+  return date.toISOString();
+}
+
 export function isExpired(expiresAt: string) {
   return new Date(expiresAt).getTime() <= Date.now();
 }

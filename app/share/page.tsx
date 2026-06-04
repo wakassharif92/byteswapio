@@ -12,7 +12,8 @@ export default function SharePage() {
         </h1>
         <p className="mt-2 text-slate-600">
           Each <BrandWordmark className="text-inherit" /> link is public, live,
-          and stays available until you delete it.
+          and saved until deleted when you are logged in. Guest links last 24
+          hours.
         </p>
         <div className="mt-8">
           <ShareTypePicker />

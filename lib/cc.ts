@@ -13,12 +13,6 @@ const names = [
   "lina",
 ];
 
-export function oneDayFromNow() {
-  const date = new Date();
-  date.setHours(date.getHours() + 24);
-  return date.toISOString();
-}
-
 export function createCcSlug() {
   const name = names[Math.floor(Math.random() * names.length)];
   const suffix = Math.floor(Math.random() * 90) + 10;

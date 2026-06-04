@@ -101,7 +101,7 @@ export default async function Home() {
               Simple short URLs. Realtime edits. Private dashboard.
             </p>
             {/* <p className="font-semibold text-black">
-              Regular shares stay until deleted. CC pasteboards expire in 24 hours.
+              Logged-in shares stay until deleted. Guest links expire in 24 hours.
             </p> */}
           </div>
 

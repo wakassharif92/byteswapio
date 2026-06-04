@@ -16,6 +16,7 @@ import {
   createSecureSlug,
   defaultTitle,
   neverExpires,
+  oneDayFromNow,
   publicShareUrl,
 } from "@/lib/utils";
 import Link from "next/link";
@@ -103,7 +104,7 @@ export function ShareEditor({ type }: { type: ShareType }) {
             description: null,
             url: null,
             language: type === "code" ? "Text" : null,
-            expires_at: neverExpires(),
+            expires_at: userData.user ? neverExpires() : oneDayFromNow(),
           })
           .select("id, slug")
           .single();
@@ -780,7 +781,7 @@ export function ShareEditor({ type }: { type: ShareType }) {
                     ? type === "password"
                       ? "Saved until you delete it"
                       : "Saved to your dashboard"
-                    : "Guest link: available until deleted"}
+                    : "Guest link: deletes after 24 hours"}
                 </span>
               ) : null}
             </div>

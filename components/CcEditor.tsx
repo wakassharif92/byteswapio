@@ -3,9 +3,10 @@
 import { BrandWordmark } from "@/components/BrandWordmark";
 import { ClickableLinks } from "@/components/ClickableLinks";
 import { CopyButton } from "@/components/CopyButton";
-import { createCcSlug, ccUrl, oneDayFromNow } from "@/lib/cc";
+import { createCcSlug, ccUrl } from "@/lib/cc";
 import { createClient } from "@/lib/supabase/client";
 import type { PublicShare, ShareContent } from "@/lib/types";
+import { oneDayFromNow } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export function CcEditor({ initialShare }: { initialShare?: PublicShare }) {
