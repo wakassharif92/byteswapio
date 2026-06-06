@@ -1,6 +1,7 @@
 "use client";
 
 import { BrandWordmark } from "@/components/BrandWordmark";
+import { ClipboardTools } from "@/components/ClipboardTools";
 import { ClickableLinks } from "@/components/ClickableLinks";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import {
@@ -9,6 +10,14 @@ import {
   hashCode,
   type PasswordVaultItem,
 } from "@/lib/crypto";
+import {
+  htmlToPlainText,
+  parseVaultItems,
+  readClipboardHtmlOrText,
+  readClipboardText,
+  serializeVaultItems,
+  writeClipboardText,
+} from "@/lib/clipboard";
 import { createClient } from "@/lib/supabase/client";
 import type { PublicShare, ShareContent } from "@/lib/types";
 import { SHARE_TYPE_LABELS } from "@/lib/types";
@@ -36,6 +45,7 @@ export function PublicShareViewer({
   const saveTimer = useRef<number | null>(null);
   const hasPendingLocalChange = useRef(false);
   const localEditVersion = useRef(0);
+  const documentEditorRef = useRef<HTMLDivElement | null>(null);
   const [share, setShare] = useState(initialShare);
   const [content, setContent] = useState<ShareContent | null>(
     initialShare.share_contents,
@@ -148,6 +158,65 @@ export function PublicShareViewer({
     localEditVersion.current += 1;
     hasPendingLocalChange.current = true;
     return localEditVersion.current;
+  }
+
+  async function copyBody() {
+    await writeClipboardText(body);
+  }
+
+  async function pasteBody() {
+    const nextBody = await readClipboardText();
+    const saveVersion = markLocalChange();
+    setBody(nextBody);
+    scheduleContentSave({ body: nextBody }, saveVersion);
+  }
+
+  async function copyDocument() {
+    await writeClipboardText(htmlToPlainText(html), html);
+  }
+
+  async function pasteDocument() {
+    const nextHtml = await readClipboardHtmlOrText();
+    const saveVersion = markLocalChange();
+    setHtml(nextHtml);
+
+    if (documentEditorRef.current) {
+      documentEditorRef.current.innerHTML = nextHtml;
+    }
+
+    scheduleContentSave({ html: nextHtml }, saveVersion);
+  }
+
+  async function copyNotes() {
+    await writeClipboardText(notes);
+  }
+
+  async function pasteNotes() {
+    const nextNotes = await readClipboardText();
+    const saveVersion = markLocalChange();
+    setNotes(nextNotes);
+    scheduleContentSave({ notes: nextNotes }, saveVersion);
+  }
+
+  async function copyEditableVault() {
+    await writeClipboardText(serializeVaultItems(editablePasswordItems));
+  }
+
+  async function pasteEditableVault() {
+    const nextItems = parseVaultItems(await readClipboardText());
+
+    if (!nextItems.length) {
+      return;
+    }
+
+    setEditablePasswordItems(
+      nextItems.map((item) => ({
+        id: crypto.randomUUID(),
+        name: item.name,
+        originalName: "",
+        password: item.password,
+      })),
+    );
   }
 
   async function unlockPassword(event: React.FormEvent<HTMLFormElement>) {
@@ -377,11 +446,14 @@ export function PublicShareViewer({
       </div>
 
       <div className="mt-5">
-        {share.type === "code" ? (
+        {share.type === "code" || share.type === "live_code" ? (
           <>
-            <p className="mb-2 text-sm font-medium text-slate-500">
-              {share.language ?? "Text"} · live writable
-            </p>
+            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm font-medium text-slate-500">
+                {share.language ?? "Text"} · live writable
+              </p>
+              <ClipboardTools onCopy={copyBody} onPaste={pasteBody} />
+            </div>
             <textarea
               className="min-h-96 w-full resize-y rounded-md bg-slate-950 p-4 font-mono text-sm leading-6 text-slate-50 outline-none focus:ring-2 focus:ring-sky-500"
               value={body}
@@ -397,10 +469,14 @@ export function PublicShareViewer({
         ) : null}
         {share.type === "document" ? (
           <>
-            <p className="mb-2 text-sm font-medium text-slate-500">
-              Live writable document
-            </p>
+            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm font-medium text-slate-500">
+                Live writable document
+              </p>
+              <ClipboardTools onCopy={copyDocument} onPaste={pasteDocument} />
+            </div>
             <div
+              ref={documentEditorRef}
               className="prose min-h-96 max-w-none rounded-md border border-slate-300 bg-white p-4 leading-7 text-slate-800 outline-none focus:border-sky-500"
               contentEditable
               dangerouslySetInnerHTML={{
@@ -432,7 +508,10 @@ export function PublicShareViewer({
               </a>
             ) : null}
             <label className="grid gap-1 text-sm font-medium text-slate-700">
-              Live notes
+              <span className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                Live notes
+                <ClipboardTools onCopy={copyNotes} onPaste={pasteNotes} />
+              </span>
               <textarea
                 className="min-h-56 rounded-md border border-slate-300 px-3 py-2 font-normal leading-7 outline-none focus:border-slate-950"
                 value={notes}
@@ -453,7 +532,10 @@ export function PublicShareViewer({
         {share.type === "note" ? (
           <div className="grid gap-3">
             <label className="grid gap-1 text-sm font-medium text-slate-700">
-              Live note
+              <span className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                Live note
+                <ClipboardTools onCopy={copyBody} onPaste={pasteBody} />
+              </span>
               <textarea
                 className="min-h-96 rounded-md border border-slate-300 px-3 py-2 font-normal leading-7 outline-none focus:border-slate-950"
                 value={body}
@@ -515,12 +597,21 @@ export function PublicShareViewer({
             ) : (
               <form onSubmit={saveSharedVault} className="grid gap-4">
                 <div className="rounded-md border border-slate-200 bg-white p-4">
-                  <h2 className="text-base font-semibold text-slate-950">
-                    Password vault
-                  </h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                    Add names and passwords. Saving requires the 5-number PIN.
-                  </p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h2 className="text-base font-semibold text-slate-950">
+                        Password vault
+                      </h2>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">
+                        Add names and passwords. Saving requires the 5-number
+                        PIN.
+                      </p>
+                    </div>
+                    <ClipboardTools
+                      onCopy={copyEditableVault}
+                      onPaste={pasteEditableVault}
+                    />
+                  </div>
                 </div>
                 <div className="grid gap-3">
                   {editablePasswordItems.map((item, index) => (

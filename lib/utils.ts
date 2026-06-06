@@ -51,6 +51,12 @@ export function oneDayFromNow() {
   return date.toISOString();
 }
 
+export function threeHoursFromNow() {
+  const date = new Date();
+  date.setHours(date.getHours() + 3);
+  return date.toISOString();
+}
+
 export function isExpired(expiresAt: string) {
   return new Date(expiresAt).getTime() <= Date.now();
 }
@@ -70,6 +76,7 @@ export function publicShareUrl(slug: string) {
 export function defaultTitle(type: ShareType) {
   const labels: Record<ShareType, string> = {
     code: "Untitled code share",
+    live_code: "Live coding interview",
     document: "Untitled document",
     link: "Untitled link",
     bookmark: "Untitled bookmark",
@@ -78,6 +85,10 @@ export function defaultTitle(type: ShareType) {
   };
 
   return labels[type];
+}
+
+export function shareEditorPath(type: ShareType) {
+  return type === "live_code" ? "/share/live-code" : `/share/${type}`;
 }
 
 export async function sha256(value: string) {

@@ -4,9 +4,10 @@ ByteSwapio is a production-ready MVP for live shares built with Next.js App Rout
 
 ## Features
 
-- Share code, documents, links, bookmarks, notes, and encrypted passwords.
+- Share code, live coding rooms, documents, links, bookmarks, notes, and encrypted passwords.
 - Public `/s/[slug]` links update live with Supabase Realtime.
 - Fast copy-paste links at `/cc` create 24-hour live notes with simple names such as `/cc/ali92`.
+- Live coding rooms use `/share/live-code`, update in realtime, and expire after 3 hours.
 - Regular shares use short names such as `/s/anderson92`.
 - Password vault links use long high-entropy URLs and never expire automatically.
 - Logged-in shares stay available until deleted; guest code, document, link, and note shares expire after 24 hours.
@@ -76,6 +77,7 @@ Cleanup created:
 - `/share/code`
 - `/share/document`
 - `/share/link`
+- `/share/live-code`
 - `/share/bookmark`
 - `/share/note`
 - `/share/password`
@@ -91,6 +93,8 @@ This MVP uses Supabase Auth, Postgres, Realtime, and the official Supabase SSR/b
 ## Live writing
 
 Realtime is enabled for `shares` and `share_contents` in the migration. The public `/s/[slug]` page renders editable fields for code, documents, links, bookmarks, and notes. When any viewer edits the shared text, the app updates `share_contents`, and every other open viewer receives the change through Supabase Realtime.
+
+Live coding rooms are a code-editor variant for interviews or pairing sessions. They are saved to the creator dashboard when the creator is logged in, can be deleted manually, and are deleted automatically after 3 hours.
 
 Password shares are intentionally different: anonymous users cannot create password shares. Anyone with the link must enter the access password first, then a 5-number PIN for a specific row. The revealed password hides again after 5 seconds.
 

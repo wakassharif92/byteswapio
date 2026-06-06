@@ -3,6 +3,7 @@
 import { BrandWordmark } from "@/components/BrandWordmark";
 import { createClient } from "@/lib/supabase/client";
 import type { ShareType } from "@/lib/types";
+import { shareEditorPath } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -44,7 +45,7 @@ export function FeatureShareButton({ action }: { action: FeatureAction }) {
       }
     }
 
-    router.push(`/share/${action}`);
+    router.push(shareEditorPath(action));
   }
 
   return (

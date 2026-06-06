@@ -14,6 +14,7 @@ type Category = "all" | ShareType;
 const categoryDescriptions: Record<Category, string> = {
   all: "Every share",
   code: "Live code",
+  live_code: "3-hour rooms",
   document: "Docs",
   link: "URLs",
   bookmark: "Saved URLs",

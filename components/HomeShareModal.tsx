@@ -3,13 +3,19 @@
 import { CopyButton } from "@/components/CopyButton";
 import { createClient } from "@/lib/supabase/client";
 import { SHARE_TYPE_LABELS, SHARE_TYPES, type ShareType } from "@/lib/types";
-import { createSlug, neverExpires, publicShareUrl } from "@/lib/utils";
+import {
+  createSlug,
+  neverExpires,
+  publicShareUrl,
+  shareEditorPath,
+} from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
 
 const descriptions: Record<ShareType, string> = {
   code: "Full-screen live code editor.",
+  live_code: "3-hour interview coding room.",
   document: "Rich HTML with links and tables.",
   link: "A URL with shared notes.",
   bookmark: "Login-only saved URL.",
@@ -46,6 +52,14 @@ const icons: Record<ShareType, ReactNode> = {
       <path d="m8 9-4 3 4 3" />
       <path d="m16 9 4 3-4 3" />
       <path d="m14 5-4 14" />
+    </MenuIcon>
+  ),
+  live_code: (
+    <MenuIcon>
+      <path d="m8 9-4 3 4 3" />
+      <path d="m16 9 4 3-4 3" />
+      <path d="M12 6v12" />
+      <path d="M7 20h10" />
     </MenuIcon>
   ),
   document: (
@@ -222,7 +236,7 @@ export function HomeShareModal({
       return;
     }
 
-    router.push(`/share/${type}`);
+    router.push(shareEditorPath(type));
   }
 
   function close() {

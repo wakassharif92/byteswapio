@@ -1,8 +1,10 @@
 import { SHARE_TYPE_LABELS, SHARE_TYPES } from "@/lib/types";
+import { shareEditorPath } from "@/lib/utils";
 import Link from "next/link";
 
 const descriptions = {
   code: "Live code snippets with language labels.",
+  live_code: "Interview-style live coding rooms that delete after 3 hours.",
   document: "Rich HTML notes with pasted links and tables.",
   link: "A single URL with context.",
   bookmark: "Saved links with notes for later.",
@@ -16,7 +18,7 @@ export function ShareTypePicker() {
       {SHARE_TYPES.map((type) => (
         <Link
           key={type}
-          href={`/share/${type}`}
+          href={shareEditorPath(type)}
           className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
         >
           <h2 className="text-lg font-semibold text-slate-950">

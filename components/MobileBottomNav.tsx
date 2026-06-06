@@ -3,6 +3,7 @@
 import { BrandWordmark } from "@/components/BrandWordmark";
 import { createClient } from "@/lib/supabase/client";
 import type { ShareType } from "@/lib/types";
+import { shareEditorPath } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
@@ -12,6 +13,7 @@ type NavAction = ShareType | "home";
 const items: { label: string; action: NavAction; icon: ReactNode }[] = [
   { label: "Home", action: "home", icon: <path d="M4 11 12 4l8 7v9H5v-9Z" /> },
   { label: "Code", action: "code", icon: <path d="m9 9-4 3 4 3m6-6 4 3-4 3" /> },
+  { label: "Live", action: "live_code", icon: <path d="m8 9-4 3 4 3m8-6 4 3-4 3M12 6v12" /> },
   { label: "Docs", action: "document", icon: <path d="M7 3h7l5 5v13H7Zm7 0v5h5" /> },
   { label: "Link", action: "link", icon: <path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" /> },
   { label: "Mark", action: "bookmark", icon: <path d="M7 4h10v17l-5-3-5 3Z" /> },
@@ -65,7 +67,7 @@ export function MobileBottomNav() {
       return pathname === "/" || pathname === "/dashboard";
     }
 
-    return pathname === `/share/${action}`;
+    return pathname === shareEditorPath(action);
   }
 
   async function open(action: NavAction) {
@@ -83,13 +85,13 @@ export function MobileBottomNav() {
       }
     }
 
-    router.push(`/share/${action}`);
+    router.push(shareEditorPath(action));
   }
 
   return (
     <>
       <nav className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-[9999] border-t border-blue-100 bg-white/95 px-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-18px_55px_rgba(15,23,42,0.2)] backdrop-blur-xl">
-        <div className="mx-auto grid w-full max-w-md grid-cols-6 gap-1">
+        <div className="mx-auto grid w-full max-w-md grid-cols-7 gap-1">
           {items.map((item) => {
             const active = isActive(item.action);
 

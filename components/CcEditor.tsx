@@ -1,8 +1,10 @@
 "use client";
 
 import { BrandWordmark } from "@/components/BrandWordmark";
+import { ClipboardTools } from "@/components/ClipboardTools";
 import { ClickableLinks } from "@/components/ClickableLinks";
 import { CopyButton } from "@/components/CopyButton";
+import { readClipboardText, writeClipboardText } from "@/lib/clipboard";
 import { createCcSlug, ccUrl } from "@/lib/cc";
 import { createClient } from "@/lib/supabase/client";
 import type { PublicShare, ShareContent } from "@/lib/types";
@@ -22,6 +24,16 @@ export function CcEditor({ initialShare }: { initialShare?: PublicShare }) {
   const [error, setError] = useState("");
 
   const link = slug ? ccUrl(slug) : "";
+
+  async function copyBody() {
+    await writeClipboardText(body);
+  }
+
+  async function pasteBody() {
+    localEditVersion.current += 1;
+    hasPendingLocalChange.current = true;
+    setBody(await readClipboardText());
+  }
 
   useEffect(() => {
     async function createShare() {
@@ -191,8 +203,13 @@ export function CcEditor({ initialShare }: { initialShare?: PublicShare }) {
       <main className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 pb-6 sm:px-6">
         <div className="min-h-0 flex-1 rounded-[28px] bg-[linear-gradient(135deg,rgba(37,99,235,0.7),rgba(244,114,255,0.62),rgba(234,240,74,0.46),rgba(125,211,252,0.64))] p-[2px] shadow-[0_28px_80px_rgba(37,99,235,0.16)]">
           <div className="min-h-full rounded-[26px] bg-white/88 p-3 shadow-inner backdrop-blur">
+            <ClipboardTools
+              className="mb-3 px-2 pt-1"
+              onCopy={copyBody}
+              onPaste={pasteBody}
+            />
             <textarea
-              className="h-[calc(100vh-16.5rem)] w-full resize-none rounded-[20px] border border-transparent bg-white/80 p-6 text-lg font-medium leading-9 text-slate-800 outline-none placeholder:text-slate-400 focus:bg-white sm:p-8"
+              className="h-[calc(100vh-19.5rem)] w-full resize-none rounded-[20px] border border-transparent bg-white/80 p-6 text-lg font-medium leading-9 text-slate-800 outline-none placeholder:text-slate-400 focus:bg-white sm:p-8"
               value={body}
               onChange={(event) => {
                 localEditVersion.current += 1;

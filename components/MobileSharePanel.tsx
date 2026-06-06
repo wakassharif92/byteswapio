@@ -3,6 +3,7 @@
 import { BrandWordmark } from "@/components/BrandWordmark";
 import { createClient } from "@/lib/supabase/client";
 import type { ShareType } from "@/lib/types";
+import { shareEditorPath } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
@@ -20,6 +21,12 @@ const actions: {
     title: "Code",
     description: "Open live code editor",
     icon: <path d="m9 9-4 3 4 3m6-6 4 3-4 3" />,
+  },
+  {
+    action: "live_code",
+    title: "Live coding",
+    description: "3-hour interview room",
+    icon: <path d="m8 9-4 3 4 3m8-6 4 3-4 3M12 6v12" />,
   },
   {
     action: "document",
@@ -97,7 +104,7 @@ export function MobileSharePanel() {
       }
     }
 
-    router.push(`/share/${action}`);
+    router.push(shareEditorPath(action));
   }
 
   return (

@@ -1,5 +1,6 @@
 export const SHARE_TYPES = [
   "code",
+  "live_code",
   "document",
   "link",
   "bookmark",
@@ -59,6 +60,7 @@ export type CcLink = {
 
 export const SHARE_TYPE_LABELS: Record<ShareType, string> = {
   code: "Code",
+  live_code: "Live coding",
   document: "Document",
   link: "Link",
   bookmark: "Bookmark",

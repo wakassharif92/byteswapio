@@ -23,6 +23,13 @@ const featureDetails: {
       "Paste a snippet, choose a language, and share a short link. Anyone with the link can see changes as they happen, which makes it useful for debugging, interviews, teaching, and quick reviews.",
   },
   {
+    label: "Live coding",
+    action: "live_code",
+    title: "Interview coding rooms that clean themselves up.",
+    description:
+      "Open a live coding room for interviews, pair debugging, or quick algorithm sessions. It behaves like the code editor, but expires after 3 hours and can still be deleted from the dashboard.",
+  },
+  {
     label: "Documents",
     action: "document",
     title: "Rich documents without sending files around.",

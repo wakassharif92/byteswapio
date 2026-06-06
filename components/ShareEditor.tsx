@@ -1,16 +1,25 @@
 "use client";
 
 import { BrandWordmark } from "@/components/BrandWordmark";
+import { ClipboardTools } from "@/components/ClipboardTools";
 import { ClickableLinks } from "@/components/ClickableLinks";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { CopyButton } from "@/components/CopyButton";
+import {
+  htmlToPlainText,
+  parseVaultItems,
+  readClipboardHtmlOrText,
+  readClipboardText,
+  serializeVaultItems,
+  writeClipboardText,
+} from "@/lib/clipboard";
 import {
   encryptPassword,
   hashCode,
   type PasswordVaultItem,
 } from "@/lib/crypto";
 import { createClient } from "@/lib/supabase/client";
-import type { ShareContent, Share, ShareType } from "@/lib/types";
+import { SHARE_TYPE_LABELS, type ShareContent, type Share, type ShareType } from "@/lib/types";
 import {
   createSlug,
   createSecureSlug,
@@ -18,6 +27,7 @@ import {
   neverExpires,
   oneDayFromNow,
   publicShareUrl,
+  threeHoursFromNow,
 } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -44,6 +54,7 @@ export function ShareEditor({ type }: { type: ShareType }) {
   const applyingRemoteChange = useRef(false);
   const hasPendingLocalChange = useRef(false);
   const localEditVersion = useRef(0);
+  const documentEditorRef = useRef<HTMLDivElement | null>(null);
   const [shareId, setShareId] = useState("");
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState(defaultTitle(type));
@@ -104,8 +115,13 @@ export function ShareEditor({ type }: { type: ShareType }) {
             title: defaultTitle(type),
             description: null,
             url: null,
-            language: type === "code" ? "Text" : null,
-            expires_at: userData.user ? neverExpires() : oneDayFromNow(),
+            language: type === "code" || type === "live_code" ? "Text" : null,
+            expires_at:
+              type === "live_code"
+                ? threeHoursFromNow()
+                : userData.user
+                  ? neverExpires()
+                  : oneDayFromNow(),
           })
           .select("id, slug")
           .single();
@@ -237,7 +253,8 @@ export function ShareEditor({ type }: { type: ShareType }) {
               title,
               description: description || null,
               url: url || null,
-              language: type === "code" ? language : null,
+              language:
+                type === "code" || type === "live_code" ? language : null,
             })
             .eq("id", shareId),
           supabase
@@ -353,6 +370,58 @@ export function ShareEditor({ type }: { type: ShareType }) {
   function markLocalChange() {
     localEditVersion.current += 1;
     hasPendingLocalChange.current = true;
+  }
+
+  async function copyBody() {
+    await writeClipboardText(body);
+  }
+
+  async function pasteBody() {
+    markLocalChange();
+    setBody(await readClipboardText());
+  }
+
+  async function copyDocument() {
+    await writeClipboardText(htmlToPlainText(html), html);
+  }
+
+  async function pasteDocument() {
+    const nextHtml = await readClipboardHtmlOrText();
+    markLocalChange();
+    setHtml(nextHtml);
+
+    if (documentEditorRef.current) {
+      documentEditorRef.current.innerHTML = nextHtml;
+    }
+  }
+
+  async function copyNotes() {
+    await writeClipboardText(notes);
+  }
+
+  async function pasteNotes() {
+    markLocalChange();
+    setNotes(await readClipboardText());
+  }
+
+  async function copyPasswordVault() {
+    await writeClipboardText(serializeVaultItems(passwordItems));
+  }
+
+  async function pastePasswordVault() {
+    const nextItems = parseVaultItems(await readClipboardText());
+
+    if (!nextItems.length) {
+      return;
+    }
+
+    setPasswordItems(
+      nextItems.map((item) => ({
+        id: crypto.randomUUID(),
+        name: item.name,
+        password: item.password,
+      })),
+    );
   }
 
   function updatePasswordItem(
@@ -520,7 +589,7 @@ export function ShareEditor({ type }: { type: ShareType }) {
   const sidebar = (
     <aside className="grid content-start gap-5 border-b border-white/70 bg-white/60 p-5 shadow-sm backdrop-blur-xl lg:border-b-0 lg:border-r lg:border-white/70">
       {commonFields}
-      {type === "code" ? (
+      {type === "code" || type === "live_code" ? (
         <label className="grid gap-2 text-sm font-bold text-slate-700">
           Language
           <select
@@ -586,21 +655,26 @@ export function ShareEditor({ type }: { type: ShareType }) {
 
   const editor = (
     <section className="min-h-0 flex-1 overflow-auto bg-slate-50 p-4">
-      {type === "code" ? (
-        <textarea
-          className="min-h-[calc(100vh-14rem)] w-full resize-none rounded-md border border-slate-800 bg-slate-950 p-5 font-mono text-sm leading-6 text-slate-50 outline-none focus:border-sky-500 lg:min-h-full"
-          value={body}
-          onChange={(event) => {
-            markLocalChange();
-            setBody(event.target.value);
-          }}
-          placeholder="Paste code here..."
-          spellCheck={false}
-        />
+      {type === "code" || type === "live_code" ? (
+        <div className="grid min-h-[calc(100vh-14rem)] grid-rows-[auto_1fr] gap-3 lg:min-h-full">
+          <ClipboardTools onCopy={copyBody} onPaste={pasteBody} />
+          <textarea
+            className="min-h-[calc(100vh-18rem)] w-full resize-none rounded-md border border-slate-800 bg-slate-950 p-5 font-mono text-sm leading-6 text-slate-50 outline-none focus:border-sky-500 lg:min-h-full"
+            value={body}
+            onChange={(event) => {
+              markLocalChange();
+              setBody(event.target.value);
+            }}
+            placeholder="Paste code here..."
+            spellCheck={false}
+          />
+        </div>
       ) : null}
       {type === "document" ? (
-        <div className="grid min-h-[calc(100vh-14rem)] grid-rows-[1fr_auto] gap-3 lg:min-h-full">
+        <div className="grid min-h-[calc(100vh-14rem)] grid-rows-[auto_1fr_auto] gap-3 lg:min-h-full">
+          <ClipboardTools onCopy={copyDocument} onPaste={pasteDocument} />
           <div
+            ref={documentEditorRef}
             className="min-h-[calc(100vh-18rem)] rounded-md border border-slate-300 bg-white p-6 text-base leading-7 outline-none focus:border-sky-500 lg:min-h-full"
             contentEditable
             suppressContentEditableWarning
@@ -613,7 +687,8 @@ export function ShareEditor({ type }: { type: ShareType }) {
         </div>
       ) : null}
       {type === "note" ? (
-        <div className="grid min-h-[calc(100vh-14rem)] grid-rows-[1fr_auto] gap-3 lg:min-h-full">
+        <div className="grid min-h-[calc(100vh-14rem)] grid-rows-[auto_1fr_auto] gap-3 lg:min-h-full">
+          <ClipboardTools onCopy={copyBody} onPaste={pasteBody} />
           <textarea
             className="min-h-[calc(100vh-18rem)] w-full resize-none rounded-md border border-slate-300 bg-white p-5 leading-7 outline-none focus:border-slate-950 lg:min-h-full"
             value={body}
@@ -628,6 +703,7 @@ export function ShareEditor({ type }: { type: ShareType }) {
       ) : null}
       {type === "link" || type === "bookmark" ? (
         <div className="grid gap-3">
+          <ClipboardTools onCopy={copyNotes} onPaste={pasteNotes} />
           <textarea
             className="min-h-[calc(100vh-18rem)] w-full resize-none rounded-md border border-slate-300 bg-white p-5 leading-7 outline-none focus:border-slate-950 lg:min-h-full"
             value={notes}
@@ -644,13 +720,22 @@ export function ShareEditor({ type }: { type: ShareType }) {
         vaultUnlocked ? (
           <div className="grid gap-4">
             <div className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
-              <h2 className="text-xl font-black text-slate-950">
-                Password vault
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Add names and passwords. They are encrypted together as one
-                file.
-              </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-950">
+                    Password vault
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Add names and passwords. They are encrypted together as one
+                    file.
+                  </p>
+                </div>
+                <ClipboardTools
+                  className="shrink-0"
+                  onCopy={copyPasswordVault}
+                  onPaste={pastePasswordVault}
+                />
+              </div>
             </div>
             <div className="grid gap-3">
               {passwordItems.map((item, index) => (
@@ -776,18 +861,20 @@ export function ShareEditor({ type }: { type: ShareType }) {
             <div className="flex flex-wrap items-center gap-3">
               <BrandWordmark href="/" className="text-xl" />
               <span className="rounded-full border border-blue-200 bg-blue-50/80 px-3 py-1 text-xs font-black uppercase text-blue-700">
-                {type} editor
+                {SHARE_TYPE_LABELS[type]} editor
               </span>
               <span className="rounded-full border border-white/70 bg-white/75 px-3 py-1 text-sm font-bold text-slate-600">
                 {statusLabel}
               </span>
               {slug ? (
                 <span className="rounded-full border border-white/70 bg-white/75 px-3 py-1 text-sm font-bold text-slate-500">
-                  {savedToAccount
-                    ? type === "password"
-                      ? "Saved until you delete it"
-                      : "Saved to your dashboard"
-                    : "Guest link: deletes after 24 hours"}
+                  {type === "live_code"
+                    ? "Interview room: deletes after 3 hours"
+                    : savedToAccount
+                      ? type === "password"
+                        ? "Saved until you delete it"
+                        : "Saved to your dashboard"
+                      : "Guest link: deletes after 24 hours"}
                 </span>
               ) : null}
             </div>
